@@ -155,15 +155,15 @@ def solve(I,T,Y,W,D,p,args=()):
                     if args['compute_IIS']:
                         m.computeIIS()
                         m.write('model.ilp')
-                    X = {t: [0,0,50] for t in T}
-                    return X,cpu
+                    X = {t: ['NoFeasible','NoFeasible','NoFeasible'] for t in T}
+                    return X,m.Runtime
             
     except GRB.GurobiError as e:
         #print('Error code ' + str(e.errno) + ": " + str(e))
-        X = {t: [0,0,50] for t in T}
+        X = {t: ['NA','NA','NA'] for t in T}
         return X,0
 
     except AttributeError:
         #print('Encountered an attribute error')
-        X = {t: [0,0,50] for t in T}
+        X = {t: ['NA','NA','NA'] for t in T}
         return X,0

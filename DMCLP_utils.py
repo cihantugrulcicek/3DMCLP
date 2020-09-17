@@ -5,6 +5,8 @@
 
 
 import numpy as np
+import pandas as pd
+import os
 
 
 # In[ ]:
@@ -54,6 +56,14 @@ def p_func(y,delta_p,t_func,t,delta_t):
 def L_bar(h,F,B,eta):
     return F + B + 10*eta*np.log10(h)
 
+def get_L_min(Q,F,B,eta):
+    return F + 10*eta*np.log10(min(Q['h'])) + B
+
+def get_bigM(Q,F,B,eta):
+    max_distance = np.sqrt((max(Q['x']) - min(Q['x']))**2 + (max(Q['y']) - min(Q['y']))**2 + (max(Q['h']))**2)
+    L_max = F + 10*eta*np.log10(max_distance) - B
+    return L_max
+
 def merge_two_dicts(x, y):
     z = x.copy()   # start with x's keys and values
     z.update(y)    # modifies z with y's keys and values & returns None
@@ -73,3 +83,43 @@ def generate_save_file(Y,W,D,p):
 
     return txt
 
+def read_instance_from_file(path):
+        df = pd.read_csv(path)
+        p = float(df.iloc[:0].columns[1])
+        df = pd.read_csv(path,skiprows=[0])
+        I = list(df['User'].unique())
+        T = list(df['Period'].unique())
+        df2 = df.set_index(['User','Period'])
+        W = {i: df2['w'][i,0] for i in I}
+        Y,D = dict(),dict()
+        for i in I:
+            Y[i] = {t: [df2['x'][i,t],df2['y'][i,t]] for t in T}
+            D[i] = {t: df2['d'][i,t] for t in T}
+        
+        return {'Y':Y,'W':W,'D':D,'p':p}
+    
+def read_instances_from_directory(path):
+    problems = {} 
+ 
+    for filename in os.listdir(path): 
+        if filename.endswith(".txt") and not filename in problems: 
+            instance = read_instance_from_file('{}{}'.format(path,filename))
+            problems[filename[:-4]] = instance
+    
+    return problems
+
+def write_result(path,instance,X_ca,X_lda,X_grb):
+    txt = 'X_ca_x,X_ca_y,X_ca_h,X_lda_x,X_lda_y,X_lda_h,X_grb_x,X_grb_y,X_grb_h\n'
+    for t in X_ca.keys():
+        if t == len(X_ca.keys()) - 1:
+            txt += '{},{},{},{},{},{},{},{},{}'.format(X_ca[t][0],X_ca[t][1],X_ca[t][2],
+                                                       X_lda[t][0],X_lda[t][1],X_lda[t][2],
+                                                       X_grb[t][0],X_grb[t][1],X_grb[t][2])
+        else:
+            txt += '{},{},{},{},{},{},{},{},{}\n'.format(X_ca[t][0],X_ca[t][1],X_ca[t][2],
+                                                        X_lda[t][0],X_lda[t][1],X_lda[t][2],
+                                                        X_grb[t][0],X_grb[t][1],X_grb[t][2])
+    with open('{}{}.txt'.format(path,instance),'w') as f:
+        f.write(txt)
+        f.close()
+            

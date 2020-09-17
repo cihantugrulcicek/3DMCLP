@@ -1,6 +1,6 @@
 This repository contains Python codes developed for the paper "3-D Dynamic UAV Base Station Location Problem". 
 
-DMCLP_Main: Main file to run the simulations. All the arguments and parameters should be defined in this file.
+DMCLP_Main: Main file to run the simulations. All the arguments and parameters should be defined in this file. The main file creates and save all instances and solutions to different txt files.
 
 DMCLP_Gurobi: Contains necessary code to solve an instance by Gurobi solver.
 

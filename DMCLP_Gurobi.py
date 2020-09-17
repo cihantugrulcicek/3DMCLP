@@ -129,7 +129,9 @@ def solve(I,T,Y,W,D,p,args=()):
                         m.addGenConstrCos(pl_aux11[i,t], pl_aux25[i,t], name='pl_aux25[{},{}]'.format(i,t))
                         m.addGenConstrSin(pl_aux11[i,t], pl_aux20[i,t], name='pl_aux26[{},{}]'.format(i,t))
 
-
+                # constraints to enforce all altitudes to be equal
+                #m.addConstrs( (x[t,2] == x[t-1,2] for t in T[1:]), name='same_altitude')
+                
                 if args['write_file']:
                     m.write('file.lp')
 

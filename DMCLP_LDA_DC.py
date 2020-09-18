@@ -24,54 +24,63 @@ def get_random_location(T,Q):
 def get_distance(x1,x2):
     return np.linalg.norm(np.subtract(x1,x2))
 
-def get_gradient(I,T,X,Y,p,omega5,args=()):
+def get_gradient(I,T,X,Y,p,omega5,gradient_type,args=()):
     # create an empty list of gradients and set all elements to zero
     g_x = []
     for t in T:
         g_x.append([0.0,0.0,0.0])
         
-    # compute gradient for each element
-    for t in T:
-        if t == 0:
-            for k in range(3):
-                if X[t] == X[t+1]:
-                    g_x[t][k] += 0.0
-                else:
-                    g_x[t][k] += -p*((X[t][k] - X[t+1][k])/get_distance(X[t],X[t+1]))
-
-                for i in I[t]:
-                    if k == 2:
-                        g_x[t][k] += (omega5[i][t]*X[t][k])/((np.log(10)*((X[t][0] - Y[i][t][0])**2 + (X[t][1] - Y[i][t][1])**2 + (X[t][2])**2)))
+    # compute gradient with respect to g(X) function if type = 1
+    if gradient_type == 1:
+        for t in T:
+            if t == 0:
+                for k in range(3):
+                    if X[t] == X[t+1]:
+                        g_x[t][k] += 0.0
                     else:
-                        g_x[t][k] += (omega5[i][t]*(X[t][k] - Y[i][t][k]))/((np.log(10)*((X[t][0] - Y[i][t][0])**2 + (X[t][1] - Y[i][t][1])**2 + (X[t][2])**2)))
+                        g_x[t][k] += -p*((X[t][k] - X[t+1][k])/get_distance(X[t],X[t+1]))
+
+                    for i in I[t]:
+                        if k == 2:
+                            g_x[t][k] += (omega5[i][t]*X[t][k])/((np.log(10)*((X[t][0] - Y[i][t][0])**2 + (X[t][1] - Y[i][t][1])**2 + (X[t][2])**2)))
+                        else:
+                            g_x[t][k] += (omega5[i][t]*(X[t][k] - Y[i][t][k]))/((np.log(10)*((X[t][0] - Y[i][t][0])**2 + (X[t][1] - Y[i][t][1])**2 + (X[t][2])**2)))
 
 
-        elif t == len(T)-1:
-            for k in range(3):
-                if X[t] == X[t-1]:
-                    g_x[t][k] += 0.0
-                else:
-                    g_x[t][k] += -p*((X[t][k] - X[t-1][k])/get_distance(X[t],X[t-1]))
-
-                for i in I[t]:
-                    if k == 2:
-                        g_x[t][k] += (omega5[i][t]*X[t][k])/((np.log(10)*((X[t][0] - Y[i][t][0])**2 + (X[t][1] - Y[i][t][1])**2 + (X[t][2])**2)))
+            elif t == len(T)-1:
+                for k in range(3):
+                    if X[t] == X[t-1]:
+                        g_x[t][k] += 0.0
                     else:
-                        g_x[t][k] += (omega5[i][t]*(X[t][k] - Y[i][t][k]))/((np.log(10)*((X[t][0] - Y[i][t][0])**2 + (X[t][1] - Y[i][t][1])**2 + (X[t][2])**2)))
+                        g_x[t][k] += -p*((X[t][k] - X[t-1][k])/get_distance(X[t],X[t-1]))
+
+                    for i in I[t]:
+                        if k == 2:
+                            g_x[t][k] += (omega5[i][t]*X[t][k])/((np.log(10)*((X[t][0] - Y[i][t][0])**2 + (X[t][1] - Y[i][t][1])**2 + (X[t][2])**2)))
+                        else:
+                            g_x[t][k] += (omega5[i][t]*(X[t][k] - Y[i][t][k]))/((np.log(10)*((X[t][0] - Y[i][t][0])**2 + (X[t][1] - Y[i][t][1])**2 + (X[t][2])**2)))
 
 
-        else:
-            for k in range(3):
-                if X[t] == X[t-1] and X[t] == X[t+1]:
-                    g_x[t][k] += 0.0
-                elif X[t] == X[t-1]:
-                    g_x[t][k] += p*((X[t+1][k] - X[t][k])/get_distance(X[t],X[t+1]))
-                elif X[t] == X[t+1]:
-                    g_x[t][k] += -p*((X[t][k] - X[t-1][k])/get_distance(X[t],X[t-1]))
-                else:
-                    g_x[t][k] += -p*(((X[t][k] - X[t-1][k])/get_distance(X[t],X[t-1])) - ((X[t+1][k] - X[t][k])/get_distance(X[t],X[t+1])))
+            else:
+                for k in range(3):
+                    if X[t] == X[t-1] and X[t] == X[t+1]:
+                        g_x[t][k] += 0.0
+                    elif X[t] == X[t-1]:
+                        g_x[t][k] += p*((X[t+1][k] - X[t][k])/get_distance(X[t],X[t+1]))
+                    elif X[t] == X[t+1]:
+                        g_x[t][k] += -p*((X[t][k] - X[t-1][k])/get_distance(X[t],X[t-1]))
+                    else:
+                        g_x[t][k] += -p*(((X[t][k] - X[t-1][k])/get_distance(X[t],X[t-1])) - ((X[t+1][k] - X[t][k])/get_distance(X[t],X[t+1])))
 
-                for i in I[t]:
+                    for i in I[t]:
+                        if k == 2:
+                            g_x[t][k] += (omega5[i][t]*X[t][k])/((np.log(10)*((X[t][0] - Y[i][t][0])**2 + (X[t][1] - Y[i][t][1])**2 + (X[t][2])**2)))
+                        else:
+                            g_x[t][k] += (omega5[i][t]*(X[t][k]-Y[i][t][k]))/((np.log(10)*((X[t][0] - Y[i][t][0])**2 + (X[t][1] - Y[i][t][1])**2 + (X[t][2])**2)))
+    else:
+        for t in T:
+            for i in I[t]:
+                for k in range(3):
                     if k == 2:
                         g_x[t][k] += (omega5[i][t]*X[t][k])/((np.log(10)*((X[t][0] - Y[i][t][0])**2 + (X[t][1] - Y[i][t][1])**2 + (X[t][2])**2)))
                     else:
@@ -129,7 +138,7 @@ def solve(I,T,Y,p,duals,args=()):
             X_old = copy.deepcopy(X)
             
             # find the gradient of current solution for the I_plus set
-            gradient = get_gradient(I_plus,T,X,Y,p,omega5,args)
+            gradient = get_gradient(I_plus,T,X,Y,p,omega5,1,args)
             
             obj = O + omega_prime_p2(I,T,X,Y,p,omega5,args)
             
@@ -148,7 +157,7 @@ def solve(I,T,Y,p,duals,args=()):
                 X_best = copy.deepcopy(X)
 
             # find the gradient of current solution for the I_minus set
-            gradient = get_gradient(I_minus,T,X,Y,p,omega5,args)
+            gradient = get_gradient(I_minus,T,X,Y,p,omega5,2,args)
 
             # update locations by the gradient with step_size
             for t in T:
@@ -181,4 +190,3 @@ def solve(I,T,Y,p,duals,args=()):
     iter_best = max(objs.items(), key=operator.itemgetter(1))[0]
     
     return locs[iter_best]
-
